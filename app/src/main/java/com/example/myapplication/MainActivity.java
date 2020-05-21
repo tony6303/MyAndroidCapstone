@@ -3,6 +3,7 @@ package com.example.myapplication;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.ViewPager;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -45,10 +47,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private MainAdapter mAdapter;
     private List<Board> mBoardList;
 
+    //내가만든 클래스의 생성자 사용
+    MainImageAdapter mImageAdapter;
+    ViewPager mViewPager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mViewPager = (ViewPager) findViewById(R.id.viewpager);
+        mImageAdapter = new MainImageAdapter(this);
+        mViewPager.setAdapter(mImageAdapter);
 
         mMainRecyclerview = findViewById(R.id.main_recyclerview); //MainActivity RecyclerView
 
