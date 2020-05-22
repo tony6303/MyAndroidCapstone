@@ -12,7 +12,9 @@ import androidx.viewpager.widget.PagerAdapter;
 
 public class MainImageAdapter extends PagerAdapter {
 
+    //수동으로 이미지 관리
     private int[] Images = {R.drawable.one, R.drawable.two, R.drawable.three};
+
     private LayoutInflater inflater;
     private Context context;
 
@@ -35,7 +37,7 @@ public class MainImageAdapter extends PagerAdapter {
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View v = inflater.inflate(R.layout.slider, container, false);
-        ImageView ImageView = (ImageView)v.findViewById(R.id.main_ImageView);
+        ImageView ImageView = v.findViewById(R.id.main_ImageView);
         ImageView.setImageResource(Images[position]);
         container.addView(v);
         return v;

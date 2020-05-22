@@ -59,6 +59,8 @@ public class WriteActivity extends AppCompatActivity implements AdapterView.OnIt
         ArrayAdapter<String> arealist;
         arealist = new ArrayAdapter<String>(this,R.layout.support_simple_spinner_dropdown_item, ArrayFirstArea);
         mFirstArea.setAdapter(arealist);
+
+        //스피너에서 부산 골랐을때 나머지 스피너 변경하게 해주는 함수
         mFirstArea.setOnItemSelectedListener(this);  //이게 있어야 override한 onItemSelect 함수를 쓸 수 있는것같습니다.
 
         //FirstArea에 따라 바뀌게 하기위해 setAdapter함수는 아래에 override 해놓았습니다.
@@ -76,7 +78,7 @@ public class WriteActivity extends AppCompatActivity implements AdapterView.OnIt
             @Override
             public void onClick(View v) {
                 //id는 Primary Key 와 같다. 랜덤으로 하나 줍니다.
-                id = mStore.collection("board").document().getId();
+                id = mStore.collection("board").getId();
 
                 Map<String, Object> post = new HashMap<>();
                 //파이어베이스 데이터베이스에 데이터를 put 합니다.
@@ -116,7 +118,7 @@ public class WriteActivity extends AppCompatActivity implements AdapterView.OnIt
         ArrayAdapter<String> worklist;
         if(mFirstArea.getSelectedItem().toString().equals("부산")) { //지역 스피너가 부산이면 작업 스피너를 알맞게 setAdapt 한다. 이하동일
             worklist = new ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item, ArrayWorklist_busan);
-            mWorkList.setAdapter(worklist);
+            mWorkList.setAdapter(worklist); //작업선택 스피너에 어댑터 연결
         } else if(mFirstArea.getSelectedItem().toString().equals("김해")){
             worklist = new ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item, ArrayWorklist_kimhae);
             mWorkList.setAdapter(worklist);
