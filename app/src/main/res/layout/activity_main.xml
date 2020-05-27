@@ -43,20 +43,20 @@
         android:layout_alignParentBottom="true">
 
         <EditText
-            android:id="@+id/search_main_area_text"
+            android:id="@+id/write_main_title_text"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="8dp"
             android:layout_weight="1"
-            android:hint="지역으로 검색(부산, 김해, 창원)"
+            android:hint="내용을 입력하세요"
             android:textSize="20dp" />
 
         <Button
-            android:id="@+id/search_main_button"
+            android:id="@+id/write_main_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:text="검색"
+            android:text="작성"
             android:textSize="20dp" />
 
     </LinearLayout>

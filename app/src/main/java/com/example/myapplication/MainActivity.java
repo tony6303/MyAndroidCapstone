@@ -17,23 +17,15 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -46,22 +38,17 @@ import javax.annotation.Nullable;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    //싱글턴 패턴
     private FirebaseFirestore mStore = FirebaseFirestore.getInstance();
+    private EditText mMainWriteTitleText;
+    private String id;
 
-    private EditText mMainSearchAreaText;
-    private String id;  //파이어베이스 primary key 설정용
-
-    //리사이클러뷰 = 게시판 나오는 레이아웃
     private RecyclerView mMainRecyclerview;
 
-    //리사이클러뷰 어댑터
     private MainAdapter mAdapter;
     private List<Board> mBoardList;
 
     //내가만든 클래스의 생성자 사용
-    //이미지 슬라이드용 (뷰페이저)
-    MainImageAdapter mImageAdapter; //
+    MainImageAdapter mImageAdapter;
     ViewPager mViewPager;
 
     @Override
@@ -69,17 +56,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mViewPager = findViewById(R.id.viewpager);
-        mImageAdapter = new MainImageAdapter(this); //new 로 인스턴스 생성
+        mViewPager = (ViewPager) findViewById(R.id.viewpager);
+        mImageAdapter = new MainImageAdapter(this);
         mViewPager.setAdapter(mImageAdapter);
 
         mMainRecyclerview = findViewById(R.id.main_recyclerview); //MainActivity RecyclerView
-        mBoardList = new ArrayList<>();  //Board 객체를 담을 ArrayList
 
         findViewById(R.id.writebutton).setOnClickListener(this); // 이 버튼의 이벤트는 OnClick 함수에 있습니다
 
-            // 파이어베이스에서 실시간으로 데이터 읽어오기
-            mStore.collection("board").addSnapshotListener(new EventListener<QuerySnapshot>() {
+        // 파이어베이스에서 실시간으로 데이터 읽어오기
+        mStore.collection("board").addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
                 for (DocumentChange dc : queryDocumentSnapshots.getDocumentChanges()){
@@ -92,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     String day = (String)dc.getDocument().getData().get("weekendorweekday");
 
 
-                    Board data = new Board(id,title,contents,name,area,work,day); //생성자 호출
+                    Board data = new Board(id,title,contents,name,area,work,day);
 
                     mBoardList.add(data);
                 }
@@ -100,59 +86,120 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mMainRecyclerview.setAdapter(mAdapter);
             }
         });
-
-        mMainSearchAreaText = findViewById(R.id.search_main_area_text); //MainActivity EditText
-        Button mainSearchButton = findViewById(R.id.search_main_button); //MainActivity Button(검색)
-
-        //검색 버튼을 누르면 발동하는 이벤트, 파이어베이스에서 title(Editext에 쓴 내용)으로 검색한다
-        mainSearchButton.setOnClickListener(new Button.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //사용자 함수 바로밑에있음
-                searchData(mMainSearchAreaText.getText().toString());
-            }
-        });
-    }  // Oncreate 끝
-
-    //Query문을 사용하여 데이터를 검색하는 사용자 함수
-    public void searchData(String s){
-        //FireStore에서 Query Like문을 사용하고 싶었는데 어떻게 쓰는지 알 수가 없었습니다. 자료가 없네요..
-        mStore.collection("board").whereEqualTo("firstArea",s) //검색하는 글자가 정확히 일치해야한다.
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() { //스냅샷 리스너가 아니라 컴플리트 리스너입니다. 차이는 모름
+        // Read firebase
+        /*mStore.collection("board").get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        mBoardList.clear();  //원래 있었던 어댑터를 초기화시킵니다.
-                        for(DocumentSnapshot dc : task.getResult()){
-                            String id = dc.getString("id");
-                            String title = dc.getString("title");
-                            String contents = dc.getString("contents");
-                            String name = dc.getString("name");
-                            String area = dc.getString("firstArea");
-                            String work = dc.getString("worklist");
-                            String day = dc.getString("weekendorweekday");
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                String id = (String)document.getData().get("id");
+                                String title = (String)document.getData().get("title");
+                                String contents = (String)document.getData().get("contents");
+                                String name = (String)document.getData().get("name");
 
-                            Board data = new Board(id,title,contents,name,area,work,day);
+                                Board data = new Board(id,title,contents,name);
 
-                            mBoardList.add(data);
+                                mBoardList.add(data);
+
+                            }
                         }
-                        mAdapter = new MainAdapter(mBoardList);
-                        mMainRecyclerview.setAdapter(mAdapter);
-                        Toast.makeText(MainActivity.this,"검색완료",Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-
                     }
                 });
+*/
+        mMainWriteTitleText = findViewById(R.id.write_main_title_text); //MainActivity EditText
+        Button mainWriteButton = (Button)findViewById(R.id.write_main_button); //MainActivity Button(작성)
+
+        //작성 버튼을 누르면 발동하는 이벤트, 파이어베이스에 id, title(Editext에 쓴 내용)을 저장한다
+        mainWriteButton.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                id = mStore.collection("board").document().getId();
+
+                Map<String, Object> post = new HashMap<>();
+                post.put("id", id);
+                //post.put("title", mWriteTitleText.getText().toString());
+                post.put("title", mMainWriteTitleText.getText().toString());  // title이 MainActivity에 보이는 속성입니다 contetns는 안보여요
+                //post.put("name", mWriteNameText.getText().toString());
+
+                mStore.collection("board").document().set(post)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Toast.makeText(MainActivity.this,"업로드성공",Toast.LENGTH_SHORT).show();
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(MainActivity.this,"업로드실패",Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
+
+        mBoardList = new ArrayList<>();
+        //mBoardList.add(new Board(null,"안녕하세요",null,"android"));
+        //mBoardList.add(new Board(null,"ㅋㅋㅋ",null,"python"));
+        //mBoardList.add(new Board(null,"어려워요",null,"java"));
+
+        //mAdapter = new MainAdapter(mBoardList);
+        //mMainRecyclerview.setAdapter(mAdapter);
     }
-
-
 
     @Override
     public void onClick(View v) { //연필 버튼 누르면 글 작성 액티비티로 이동함
         startActivity(new Intent(this,WriteActivity.class));
+    }
+    private class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainviewHolder>{
+
+        private List<Board> mBoardList;
+
+        public MainAdapter(List<Board> mBoardList) {
+            this.mBoardList = mBoardList;
+        }
+
+        @NonNull
+        @Override
+        public MainviewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new MainviewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_main,parent,false));
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull MainviewHolder holder, int position) {
+            Board data = mBoardList.get(position);
+            holder.mTitleTextView.setText(data.getTitle());
+            holder.mContentsTextView.setText(data.getContents());
+            holder.mNameTextView.setText(data.getName());
+            holder.mAreaTextView.setText(data.getArea());
+            holder.mWorkTextView.setText(data.getWork());
+            holder.mDayTextView.setText(data.getDay()); //Board 클래스 미완성
+        }
+
+        @Override
+        public int getItemCount() {  //보드 리스트 사이즈만큼
+            return mBoardList.size();
+        }
+
+        class MainviewHolder extends RecyclerView.ViewHolder{
+
+            private TextView mTitleTextView;
+            private TextView mContentsTextView;
+            private TextView mNameTextView;
+            private TextView mAreaTextView;
+            private TextView mWorkTextView;
+            private TextView mDayTextView;
+
+            public MainviewHolder(@NonNull View itemView) {
+                super(itemView);
+
+                mTitleTextView = itemView.findViewById(R.id.item_title_text);
+                mContentsTextView = itemView.findViewById(R.id.item_contents_text);
+                mNameTextView = itemView.findViewById(R.id.item_name_text);
+                mAreaTextView = itemView.findViewById(R.id.item_area_text);
+                mWorkTextView = itemView.findViewById(R.id.item_work_text);
+                mDayTextView = itemView.findViewById(R.id.item_day_text);
+
+            }
+        }
     }
 }
