@@ -17,7 +17,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firestore.v1beta1.Write;
 
 import java.util.HashMap;
 import java.util.List;

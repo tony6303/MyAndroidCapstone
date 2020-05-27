@@ -9,12 +9,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
-        <activity android:name=".WriteActivity">
-        </activity>
-        
-        <activity android:name=".MainActivity">
-
+        <activity android:name=".Drawerlayout"></activity>
+        <activity android:name=".WriteActivity"></activity>
+        <activity android:name=".Dae_MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
